@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocIQ - VPC Architecture</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Amazon Ember', 'Helvetica Neue', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #232F3E 0%, #1a252f 100%);
+            padding: 40px 20px;
+            color: #232f3e;
+        }
+
+        .container {
+            max-width: 1900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            font-size: 42px;
+            color: #232f3e;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 18px;
+            color: #545b64;
+        }
+
+        /* VPC Container */
+        .vpc-main {
+            background: white;
+            border-radius: 12px;
+            padding: 50px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .vpc-border {
+            border: 5px solid #147eba;
+            border-radius: 16px;
+            padding: 50px 40px 40px 40px;
+            background: linear-gradient(135deg, #e6f3ff 0%, #f0f8ff 100%);
+            position: relative;
+            box-shadow: inset 0 4px 12px rgba(20,126,186,0.1);
+        }
+
+        .vpc-label {
+            position: absolute;
+            top: -25px;
+            left: 40px;
+            background: linear-gradient(135deg, #147eba 0%, #0d5a8f 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 20px;
+            box-shadow: 0 6px 16px rgba(20,126,186,0.4);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Internet Gateway */
+        .igw-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .igw-box {
+            display: inline-block;
+            background: linear-gradient(135deg, #7aa116 0%, #5a7a10 100%);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(122,161,22,0.4);
+        }
+
+        .igw-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .igw-name {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        /* Availability Zones */
+        .az-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .az-container {
+            border: 4px dashed #7aa116;
+            border-radius: 12px;
+            padding: 30px 25px;
+            background: rgba(255,255,255,0.6);
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .az-label {
+            position: absolute;
+            top: -18px;
+            left: 25px;
+            background: linear-gradient(135deg, #7aa116 0%, #5a7a10 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 15px;
+            box-shadow: 0 4px 12px rgba(122,161,22,0.3);
+        }
+
+        /* Subnets */
+        .subnet {
+            border: 3px solid #4caf50;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            min-height: 200px;
+        }
+
+        .subnet.public {
+            background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
+            border-color: #4caf50;
+        }
+
+        .subnet.private {
+            background: linear-gradient(135deg, #ffebee 0%, #fff5f5 100%);
+            border-color: #d13212;
+        }
+
+        .subnet-label {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        }
+
+        .subnet.public .subnet-label {
+            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+        }
+
+        .subnet.private .subnet-label {
+            background: linear-gradient(135deg, #d13212 0%, #a82810 100%);
+        }
+
+        /* AWS Resources */
+        .resource-box {
+            background: white;
+            border: 2px solid #e1e4e8;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        .resource-box:hover {
+            transform: translateX(8px);
+            border-color: #FF9900;
+            box-shadow: 0 6px 16px rgba(255,153,0,0.3);
+        }
+
+        .resource-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .resource-info {
+            flex: 1;
+        }
+
+        .resource-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #232f3e;
+            margin-bottom: 5px;
+        }
+
+        .resource-desc {
+            font-size: 12px;
+            color: #545b64;
+            line-height: 1.5;
+        }
+
+        /* VPC Endpoints */
+        .endpoints-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #fff9e6 0%, #fffbf0 100%);
+            border: 3px solid #FF9900;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(255,153,0,0.2);
+        }
+
+        .endpoints-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #232f3e;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .endpoints-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+        }
+
+        .endpoint-card {
+            background: white;
+            border: 3px solid #FF9900;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(255,153,0,0.2);
+        }
+
+        .endpoint-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 24px rgba(255,153,0,0.4);
+        }
+
+        .endpoint-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 12px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .endpoint-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #232f3e;
+            margin-bottom: 8px;
+        }
+
+        .endpoint-type {
+            font-size: 11px;
+            color: white;
+            background: #FF9900;
+            padding: 4px 10px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .endpoint-cost {
+            font-size: 13px;
+            color: #FF9900;
+            font-weight: 700;
+        }
+
+        /* Security Groups */
+        .sg-section {
+            margin-top: 40px;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .sg-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #232f3e;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #dd344c;
+        }
+
+        .sg-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .sg-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 3px solid #dd344c;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 3px 10px rgba(221,52,76,0.2);
+        }
+
+        .sg-card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #dd344c;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sg-rule {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #dd344c;
+        }
+
+        .rule-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #232f3e;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .rule-value {
+            font-size: 12px;
+            color: #545b64;
+        }
+
+        @media (max-width: 1600px) {
+            .endpoints-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .az-grid {
+                grid-template-columns: 1fr;
+            }
+            .sg-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🔒 DocIQ - Secure VPC Architecture</h1>
+            <p>Zero-Trust Private RAG Chatbot - No Public Internet Access for Backend</p>
+        </div>
+
+        <!-- VPC Diagram -->
+        <div class="vpc-main">
+            <!-- Frontend Services (Outside VPC) -->
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; margin-bottom: 30px;">
+                <div style="background: linear-gradient(135deg, #8C4FFF 0%, #6D28D9 100%); color: white; padding: 25px; border-radius: 12px; box-shadow: 0 6px 16px rgba(140,79,255,0.4); text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 10px;">☁️</div>
+                    <div style="font-size: 22px; font-weight: 700; margin-bottom: 8px;">Amazon CloudFront</div>
+                    <div style="font-size: 14px; opacity: 0.9;">
+                        Global CDN for frontend<br>
+                        HTTPS + WAF protection<br>
+                        <strong>Public access point</strong>
+                    </div>
+                    <div style="margin-top: 15px; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 8px; font-size: 12px;">
+                        Edge locations worldwide
+                    </div>
+                </div>
+
+                <div style="background: linear-gradient(135deg, #569A31 0%, #3d7021 100%); color: white; padding: 25px; border-radius: 12px; box-shadow: 0 6px 16px rgba(86,154,49,0.4); text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 10px;">📦</div>
+                    <div style="font-size: 22px; font-weight: 700; margin-bottom: 8px;">S3 (Frontend)</div>
+                    <div style="font-size: 14px; opacity: 0.9;">
+                        Static website hosting<br>
+                        React build artifacts<br>
+                        <strong>CloudFront origin only</strong>
+                    </div>
+                    <div style="margin-top: 15px; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 8px; font-size: 12px;">
+                        Encrypted at rest (AES-256)
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="display: inline-block; background: linear-gradient(135deg, #FF9900 0%, #ec7211 100%); color: white; padding: 8px 20px; border-radius: 20px; font-size: 13px; font-weight: 700; box-shadow: 0 4px 12px rgba(255,153,0,0.3);">
+                    ↓ HTTPS API Requests (via Internal ALB) ↓
+                </div>
+            </div>
+
+            <!-- VPC Border -->
+            <div class="vpc-border">
+                <div class="vpc-label">
+                    <span style="font-size: 28px;">🔒</span>
+                    <span>VPC: 10.0.0.0/16 (us-east-1) - PRIVATE ONLY</span>
+                </div>
+
+                <!-- Availability Zones -->
+                <div class="az-grid">
+                    <!-- AZ 1 -->
+                    <div class="az-container">
+                        <div class="az-label">📍 us-east-1a</div>
+
+                        <!-- Private Subnet Only -->
+                        <div class="subnet private">
+                            <div class="subnet-label">🔐 Private Subnet: 10.0.101.0/24</div>
+                            
+                            <div class="resource-box">
+                                <div class="resource-icon" style="background: linear-gradient(135deg, #8C4FFF 0%, #6D28D9 100%);">⚖️</div>
+                                <div class="resource-info">
+                                    <div class="resource-name">Internal ALB</div>
+                                    <div class="resource-desc">
+                                        <strong>Internal only</strong> - No public access<br>
+                                        HTTPS:443 → ECS:8000<br>
+                                        Accessible via VPN/Direct Connect only
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="resource-box">
+                                <div class="resource-icon" style="background: linear-gradient(135deg, #FF9900 0%, #ec7211 100%);">🐳</div>
+                                <div class="resource-info">
+                                    <div class="resource-name">ECS Fargate Task #1</div>
+                                    <div class="resource-desc">
+                                        FastAPI Backend<br>
+                                        1 vCPU, 2GB RAM<br>
+                                        <strong>No internet access</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="resource-box">
+                                <div class="resource-icon" style="background: linear-gradient(135deg, #527FFF 0%, #3d5fcc 100%);">💾</div>
+                                <div class="resource-info">
+                                    <div class="resource-name">RDS Aurora (Primary)</div>
+                                    <div class="resource-desc">
+                                        PostgreSQL + pgvector<br>
+                                        <strong>Private subnet only</strong><br>
+                                        Encrypted at rest + in transit
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AZ 2 -->
+                    <div class="az-container">
+                        <div class="az-label">📍 us-east-1b</div>
+
+                        <!-- Private Subnet Only -->
+                        <div class="subnet private">
+                            <div class="subnet-label">🔐 Private Subnet: 10.0.102.0/24</div>
+                            
+                            <div class="resource-box">
+                                <div class="resource-icon" style="background: linear-gradient(135deg, #8C4FFF 0%, #6D28D9 100%);">⚖️</div>
+                                <div class="resource-info">
+                                    <div class="resource-name">Internal ALB</div>
+                                    <div class="resource-desc">
+                                        Multi-AZ for high availability<br>
+                                        <strong>Internal only</strong><br>
+                                        Cross-zone load balancing
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="resource-box">
+                                <div class="resource-icon" style="background: linear-gradient(135deg, #FF9900 0%, #ec7211 100%);">🐳</div>
+                                <div class="resource-info">
+                                    <div class="resource-name">ECS Fargate Task #2</div>
+                                    <div class="resource-desc">
+                                        Auto-scaled replica<br>
+                                        CPU target: 70%<br>
+                                        <strong>Isolated from internet</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="resource-box">
+                                <div class="resource-icon" style="background: linear-gradient(135deg, #527FFF 0%, #3d5fcc 100%);">💾</div>
+                                <div class="resource-info">
+                                    <div class="resource-name">RDS Aurora (Replica)</div>
+                                    <div class="resource-desc">
+                                        Read replica for failover<br>
+                                        Automated backups<br>
+                                        <strong>Private subnet only</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VPC Endpoints -->
+                <div class="endpoints-section">
+                    <div class="endpoints-title">
+                        <span style="font-size: 32px;">🔌</span>
+                        <span>VPC Endpoints (AWS PrivateLink)</span>
+                    </div>
+                    <div style="font-size: 14px; color: #545b64; margin-bottom: 25px;">
+                        Private connections to AWS services - no internet required, enhanced security
+                    </div>
+
+                    <div class="endpoints-grid">
+                        <div class="endpoint-card">
+                            <div class="endpoint-icon" style="background: linear-gradient(135deg, #569A31 0%, #3d7021 100%);">📦</div>
+                            <div class="endpoint-name">Amazon S3</div>
+                            <div class="endpoint-type">Gateway</div>
+                            <div class="endpoint-cost">$0/month</div>
+                            <div style="font-size: 11px; color: #545b64; margin-top: 8px;">
+                                <strong>2 buckets:</strong><br>
+                                1. Frontend (S3 + CloudFront)<br>
+                                2. Documents (via VPC endpoint)
+                            </div>
+                        </div>
+
+                        <div class="endpoint-card">
+                            <div class="endpoint-icon" style="background: linear-gradient(135deg, #01A88D 0%, #017a68 100%);">🤖</div>
+                            <div class="endpoint-name">AWS Bedrock</div>
+                            <div class="endpoint-type">Interface</div>
+                            <div class="endpoint-cost">$7.30/month</div>
+                            <div style="font-size: 11px; color: #545b64; margin-top: 8px;">
+                                AI inference<br>Amazon Nova Pro
+                            </div>
+                        </div>
+
+                        <div class="endpoint-card">
+                            <div class="endpoint-icon" style="background: linear-gradient(135deg, #DD344C 0%, #b02a3d 100%);">🔐</div>
+                            <div class="endpoint-name">Secrets Manager</div>
+                            <div class="endpoint-type">Interface</div>
+                            <div class="endpoint-cost">$7.30/month</div>
+                            <div style="font-size: 11px; color: #545b64; margin-top: 8px;">
+                                JWT secrets<br>Encrypted storage
+                            </div>
+                        </div>
+
+                        <div class="endpoint-card">
+                            <div class="endpoint-icon" style="background: linear-gradient(135deg, #FF9900 0%, #ec7211 100%);">📦</div>
+                            <div class="endpoint-name">Amazon ECR</div>
+                            <div class="endpoint-type">Interface</div>
+                            <div class="endpoint-cost">$7.30/month</div>
+                            <div style="font-size: 11px; color: #545b64; margin-top: 8px;">
+                                Docker images<br>Private registry
+                            </div>
+                        </div>
+
+                        <div class="endpoint-card">
+                            <div class="endpoint-icon" style="background: linear-gradient(135deg, #FF4F8B 0%, #d93f73 100%);">📊</div>
+                            <div class="endpoint-name">CloudWatch Logs</div>
+                            <div class="endpoint-type">Interface</div>
+                            <div class="endpoint-cost">$7.30/month</div>
+                            <div style="font-size: 11px; color: #545b64; margin-top: 8px;">
+                                Logging & metrics<br>Real-time monitoring
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 25px; padding: 20px; background: white; border-radius: 10px; border-left: 6px solid #FF9900;">
+                        <div style="font-size: 16px; font-weight: 700; color: #232f3e; margin-bottom: 10px;">� Zero-Trust Security Architecture</div>
+                        <div style="font-size: 13px; color: #545b64; line-height: 1.8;">
+                            <strong>✓ No Public Subnets</strong> - Backend completely isolated from internet<br>
+                            <strong>✓ Internal ALB Only</strong> - Accessible via VPN/Direct Connect/CloudFront<br>
+                            <strong>✓ VPC Endpoints</strong> - Private AWS service access (S3, Bedrock, Secrets)<br>
+                            <strong>✓ No NAT Gateway</strong> - Zero internet egress, enhanced security<br>
+                            <strong>✓ Encrypted Everything</strong> - Data at rest (AES-256) and in transit (TLS 1.3)<br>
+                            <strong>✓ Multi-Tenant Isolation</strong> - Company-level data segregation<br>
+                            <strong>✓ Compliance Ready</strong> - HIPAA, SOC 2, PCI-DSS, GDPR
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Groups -->
+        <div class="sg-section">
+            <div class="sg-title">🛡️ Security Groups (Stateful Firewall)</div>
+            
+            <div class="sg-grid">
+                <div class="sg-card">
+                    <div class="sg-card-title">
+                        <span style="font-size: 24px;">🔓</span>
+                        <span>sg-alb (ALB)</span>
+                    </div>
+                    <div class="sg-rule">
+                        <span class="rule-label">Inbound:</span>
+                        <span class="rule-value">0.0.0.0/0:443 (HTTPS from internet)</span>
+                    </div>
+                    <div class="sg-rule">
+                        <span class="rule-label">Outbound:</span>
+                        <span class="rule-value">sg-backend:8000 (to ECS tasks only)</span>
+                    </div>
+                </div>
+
+                <div class="sg-card">
+                    <div class="sg-card-title">
+                        <span style="font-size: 24px;">🔒</span>
+                        <span>sg-backend (ECS)</span>
+                    </div>
+                    <div class="sg-rule">
+                        <span class="rule-label">Inbound:</span>
+                        <span class="rule-value">sg-alb:8000 (from ALB only)</span>
+                    </div>
+                    <div class="sg-rule">
+                        <span class="rule-label">Outbound:</span>
+                        <span class="rule-value">All (via VPC endpoints)</span>
+                    </div>
+                </div>
+
+                <div class="sg-card">
+                    <div class="sg-card-title">
+                        <span style="font-size: 24px;">🔐</span>
+                        <span>sg-rds (Database)</span>
+                    </div>
+                    <div class="sg-rule">
+                        <span class="rule-label">Inbound:</span>
+                        <span class="rule-value">sg-backend:5432 (from ECS only)</span>
+                    </div>
+                    <div class="sg-rule">
+                        <span class="rule-label">Outbound:</span>
+                        <span class="rule-value">None (database doesn't initiate)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,131 @@
+name: Deploy to Demo
+
+on:
+  push:
+    branches: [demo]  # Use demo branch for demo deployments
+  pull_request:
+    branches: [demo]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: dociq
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: dociq_demo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          pip install -r backend/requirements.txt pytest httpx pytest-asyncio
+
+      - name: Run migrations on test DB
+        run: |
+          cd backend
+          alembic upgrade head
+        env:
+          DATABASE_URL: postgresql://dociq:testpassword@localhost:5432/dociq_demo
+          ENV: demo
+
+      - name: Run tests
+        run: pytest backend/tests/ -v --tb=short
+        env:
+          ENV: demo
+          DATABASE_URL: postgresql://dociq:testpassword@localhost:5432/dociq_demo
+          JWT_SECRET: demo-secret-minimum-32-characters-long
+
+      - name: Lint
+        run: |
+          pip install flake8
+          flake8 backend/ --max-line-length=100 --exclude=venv,migrations
+
+  deploy-demo:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/demo'  # Only deploy on direct pushes to demo branch
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to demo EC2
+        env:
+          EC2_HOST: ${{ secrets.DEMO_EC2_HOST }}
+          EC2_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          echo "$EC2_KEY" > /tmp/key && chmod 400 /tmp/key
+          rsync -avz -e "ssh -i /tmp/key -o StrictHostKeyChecking=no" \
+            backend/ ec2-user@$EC2_HOST:/app/backend/
+          ssh -i /tmp/key -o StrictHostKeyChecking=no ec2-user@$EC2_HOST \
+            "cd /app/backend && alembic upgrade head && sudo systemctl restart dociq"
+          rm /tmp/key
+
+      - name: Health check demo
+        env:
+          EC2_HOST: ${{ secrets.DEMO_EC2_HOST }}
+        run: |
+          sleep 10
+          curl -k https://$EC2_HOST/health
+          echo "Demo deployment health check completed"
+
+      - name: Post demo URL to PR comment
+        if: github.event_name == 'pull_request'
+        env:
+          EC2_HOST: ${{ secrets.DEMO_EC2_HOST }}
+        run: |
+          echo "🚀 Demo deployed → https://$EC2_HOST"
+          echo "⚠️ Note: This is a demo environment with limited resources"
+          echo "💰 Cost: Under $20/month using free tier"
+
+  cost-monitor:
+    needs: deploy-demo
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/demo'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check AWS costs
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          pip install awscli
+          
+          # Get current month cost
+          START_DATE=$(date -d "$(date +%Y-%m-01)" +%Y-%m-%d)
+          END_DATE=$(date +%Y-%m-%d)
+          
+          COST=$(aws ce get-cost-and-usage \
+            --time-period Start=$START_DATE,End=$END_DATE \
+            --granularity MONTHLY \
+            --metrics BlendedCost \
+            --group-by TYPE \
+            --query 'Results[0].Total.BlendedCost.Amount' \
+            --output text 2>/dev/null || echo "0")
+          
+          echo "Current month cost: $$COST"
+          
+          # Check if approaching limit
+          if (( $(echo "$COST > 15" | bc -l) )); then
+            echo "⚠️ WARNING: Approaching $20 budget limit"
+            echo "Current cost: $$COST"
+          else
+            echo "✅ Cost within budget: $$COST / $20"
+          fi

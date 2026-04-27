@@ -1,0 +1,49 @@
+{
+  "DocIQEC2RolePolicy": {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "AllowDocBucketAccess",
+        "Effect": "Allow",
+        "Action": ["s3:ListBucket"],
+        "Resource": ["arn:aws:s3:::dociq-documents-staging", "arn:aws:s3:::dociq-documents-prod"]
+      },
+      {
+        "Sid": "AllowDocObjectRW",
+        "Effect": "Allow",
+        "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+        "Resource": ["arn:aws:s3:::dociq-documents-staging/*", "arn:aws:s3:::dociq-documents-prod/*"]
+      },
+      {
+        "Sid": "AllowBedrockModelInvoke",
+        "Effect": "Allow",
+        "Action": ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
+        "Resource": [
+          "arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-pro-v1:0",
+          "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-5-sonnet-*"
+        ]
+      },
+      {
+        "Sid": "AllowSecretsRead",
+        "Effect": "Allow",
+        "Action": ["secretsmanager:GetSecretValue"],
+        "Resource": [
+          "arn:aws:secretsmanager:us-east-1:*:secret:dociq/staging/*",
+          "arn:aws:secretsmanager:us-east-1:*:secret:dociq/prod/*"
+        ]
+      },
+      {
+        "Sid": "AllowKmsUsageForDocKey",
+        "Effect": "Allow",
+        "Action": ["kms:Decrypt", "kms:Encrypt", "kms:GenerateDataKey", "kms:DescribeKey"],
+        "Resource": ["arn:aws:kms:us-east-1:*:key/<DOCIQ_CMK_ID>"]
+      },
+      {
+        "Sid": "AllowCloudWatchLogsWrite",
+        "Effect": "Allow",
+        "Action": ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+        "Resource": "arn:aws:logs:us-east-1:*:*"
+      }
+    ]
+  }
+}

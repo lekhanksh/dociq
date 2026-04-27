@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocIQ - Document Upload Flow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Amazon Ember', 'Helvetica Neue', Roboto, Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 30px;
+            color: #232f3e;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #569A31;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            color: #232f3e;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 16px;
+            color: #545b64;
+        }
+
+        .time-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #569A31 0%, #3d7021 100%);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        /* Flow Steps */
+        .flow-container {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .flow-step {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+            position: relative;
+            animation: slideIn 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .flow-step:nth-child(1) { animation-delay: 0.1s; }
+        .flow-step:nth-child(2) { animation-delay: 0.2s; }
+        .flow-step:nth-child(3) { animation-delay: 0.3s; }
+        .flow-step:nth-child(4) { animation-delay: 0.4s; }
+        .flow-step:nth-child(5) { animation-delay: 0.5s; }
+        .flow-step:nth-child(6) { animation-delay: 0.6s; }
+        .flow-step:nth-child(7) { animation-delay: 0.7s; }
+        .flow-step:nth-child(8) { animation-delay: 0.8s; }
+        .flow-step:nth-child(9) { animation-delay: 0.9s; }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .step-number {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #569A31 0%, #3d7021 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 4px 12px rgba(86, 154, 49, 0.4);
+            position: relative;
+            z-index: 2;
+        }
+
+        .step-connector {
+            position: absolute;
+            left: 40px;
+            top: 80px;
+            width: 4px;
+            height: calc(100% - 40px);
+            background: linear-gradient(180deg, #569A31 0%, #3d7021 100%);
+            z-index: 1;
+        }
+
+        .flow-step:last-child .step-connector {
+            display: none;
+        }
+
+        .step-content {
+            background: #f8f9fa;
+            border: 2px solid #e1e4e8;
+            border-radius: 8px;
+            padding: 25px;
+            border-left: 4px solid #569A31;
+        }
+
+        .step-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #232f3e;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+        }
+
+        .icon-upload { background: #FF9900; }
+        .icon-validate { background: #DD344C; }
+        .icon-extract { background: #527FFF; }
+        .icon-chunk { background: #8C4FFF; }
+        .icon-embed { background: #01A88D; }
+        .icon-store { background: #569A31; }
+        .icon-s3 { background: #569A31; }
+        .icon-db { background: #527FFF; }
+        .icon-success { background: #28a745; }
+
+        .step-description {
+            font-size: 14px;
+            color: #545b64;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .code-block {
+            background: #232f3e;
+            color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        .code-comment {
+            color: #7aa116;
+        }
+
+        .code-keyword {
+            color: #FF9900;
+        }
+
+        .code-string {
+            color: #01A88D;
+        }
+
+        .code-number {
+            color: #8C4FFF;
+        }
+
+        /* Validation Rules */
+        .validation-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .validation-item {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid #DD344C;
+            font-size: 12px;
+        }
+
+        .validation-label {
+            font-weight: 600;
+            color: #DD344C;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            text-align: center;
+            border: 2px solid #569A31;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #569A31;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #545b64;
+            margin-top: 3px;
+        }
+
+        /* Summary Box */
+        .summary-box {
+            margin-top: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #232f3e 0%, #3f4e5f 100%);
+            color: white;
+            border-radius: 8px;
+            border-left: 6px solid #569A31;
+        }
+
+        .summary-box h3 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #569A31;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .summary-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .summary-item h4 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #FF9900;
+        }
+
+        .summary-item ul {
+            list-style: none;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .summary-item li:before {
+            content: "✓ ";
+            color: #569A31;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        @media (max-width: 1024px) {
+            .validation-grid,
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📤 Document Upload Flow</h1>
+            <p>From Browser to S3: Complete Pipeline with Validation, Extraction & Indexing</p>
+        </div>
+
+        <div style="text-align: center;">
+            <div class="time-badge">⏱️ Total Time: 5-10 seconds per document</div>
+        </div>
+
+        <div class="flow-container">
+            <!-- Step 1 -->
+            <div class="flow-step">
+                <div style="position: relative;">
+                    <div class="step-number">1</div>
+                    <div class="step-connector"></div>
+                </div>
+                <div class="step-content">
+                    <div class="step-title">
+                        <div class="step-icon icon-upload"></div>
+                        User Selects File (Frontend)
+                    </div>
+                    <div class="step-description">
+                        User drags and drops a PDF file or clicks to browse. Frontend validates file before upload.
+                    </div>
+                    <div class="code-block">
+<span class="code-keyword">const</span> handleUpload = <span class="code-keyword">async</span> (file: File) => {
+  <span class="code-comment">// Client-side validation</span>
+  <span class="code-keyword">if</span> (file.size > <span class="code-number">10485760</span>) {
+    <span class="code-keyword">throw</span> <span class="code-keyword">new</span> Error(<span class="code-string">"File too large (max 10MB)"</span>);
+  }
+  
+  <span class="code-keyword">const</span> formData = <span class="code-keyword">new</span> FormData();
+  formData.append(<span class="code-string">"file"</span>, file);
+  formData.append(<span class="code-string">"department"</span>, <span class="code-string">"finance"</span>);
+  
+  <span class="code-keyword">await</span> fetch(<span class="code-string">"/upload"</span>, { method: <span class="code-string">"POST"</span>, body: formData });
+};
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="flow-step">
+                <div style="position: relative;">
+                    <div class="step-number">2</div>
+                    <div class="step-connector"></div>
+                </div>
+                <div class="step-content">
+                    <div class="step-title">
+                        <div class="step-icon icon-validate"></div>
+                        Backend Validation (FastAPI)
+                    </div>
+                    <div class="step-description">
+                        Server validates file type, size, user permissions, and file integrity.
+                    </div>
+                    <div class="validation-grid">
+                        <div class="validation-item">
+                            <span class="validation-label">File Type</span>
+                            .pdf, .docx, .doc, .txt, .md only
+                        </div>
+                        <div class="validation-item">
+                            <span class="validation-label">File Size</span>
+                            Maximum 10MB (HTTP 413 if exceeded)
+                        </div>
+                        <div class="validation-item">
+                            <span class="validation-label">User Role</span>
+                            Must be admin or uploader (HTTP 403)
+                        </div>
+                    </div>
+                    <div class="code-block">
+<span class="code-keyword">@app.post</span>(<span class="code-string">"/upload"</span>)
+<span class="code-keyword">async def</span> upload_document(
+    file: UploadFile,
+    department: str,
+    current_user: dict = Depends(get_current_user)
+):
+    <span class="code-comment"># Validate file type</span>
+    <span class="code-keyword">if not</span> file.filename.endswith((<span class="code-string">".pdf"</span>, <span class="code-string">".docx"</span>, <span class="code-string">".txt"</span>)):
+        <span class="code-keyword">raise</span> HTTPException(<span class="code-number">415</span>, <span class="code-string">"Unsupported file type"</span>)
+    
+    <span class="code-comment"># Validate file size</span>
+    content = <span class="code-keyword">await</span> file.read()
+    <span class="code-keyword">if</span> len(content) > <span class="code-number">10485760</span>:
+        <span class="code-keyword">raise</span> HTTPException(<span class="code-number">413</span>, <span class="code-string">"File too large"</span>)
+    
+    <span class="code-comment"># Validate user role</span>
+    <span class="code-keyword">if</span> current_user[<span class="code-string">"role"</span>] == <span class="code-string">"viewer"</span>:
+        <span class="code-keyword">raise</span> HTTPException(<span class="code-number">403</span>, <span class="code-string">"Viewers cannot upload"</span>)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flow-step">
+                <div style="position: relative;">
+                    <div class="step-number">3</div>
+                    <div class="step-connector"></div>
+                </div>
+                <div class="step-content">
+                    <div class="step-title">
+                        <div class="step-icon icon-extract"></div>
+                        Text Extraction
+                    </div>
+                    <div class="step-description">
+                        Extract text from PDF (PyPDF2), DOCX (python-docx), or TXT files. Returns HTTP 422 if extraction fails.
+                    </div>
+                    <div class="code-block">
+<span class="code-keyword">def</span> extract_text(file_bytes: bytes, filename: str) -> str:
+    <span class="code-keyword">if</span> filename.endswith(<span class="code-string">".pdf"</span>):
+        <span class="code-keyword">import</span> PyPDF2
+        reader = PyPDF2.PdfReader(io.BytesIO(file_bytes))
+        text = <span class="code-string">""</span>.join([page.extract_text() <span class="code-keyword">for</span> page <span class="code-keyword">in</span> reader.pages])
+        
+    <span class="code-keyword">elif</span> filename.endswith(<span class="code-string">".docx"</span>):
+        <span class="code-keyword">import</span> docx
+        doc = docx.Document(io.BytesIO(file_bytes))
+        text = <span class="code-string">"\n"</span>.join([para.text <span class="code-keyword">for</span> para <span class="code-keyword">in</span> doc.paragraphs])
+        
+    <span class="code-keyword">else</span>:  <span class="code-comment"># .txt</span>
+        text = file_bytes.decode(<span class="code-string">"utf-8"</span>)
+    
+    <span class="code-keyword">if not</span> text.strip():
+        <span class="code-keyword">raise</span> HTTPException(<span class="code-number">422</span>, <span class="code-string">"Could not extract text"</span>)
+    
+    <span class="code-keyword">return</span> text
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="flow-step">
+                <div style="position: relative;">
+                    <div class="step-number">4</div>
+                    <div class="step-connector"></div>
+                </div>
+                <div class="step-content">
+                    <div class="step-title">
+                        <div class="step-icon icon-chunk"></div>
+                        Text Chunking
+                    </div>
+                    <div class="step-description">
+                        Split text into overlapping chunks for better context preservation during retrieval.
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value">500</div>
+                            <div class="stat-label">Characters per chunk</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">50</div>
+                            <div class="stat-label">Character overlap</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">~40</div>
+                            <div class="stat-label">Chunks per 10-page PDF</div>
+                        </div>
+                    </div>
+                    <div class="code-block">
+<span class="code-keyword">def</span> chunk_text(text: str, chunk_size=<span class="code-number">500</span>, overlap=<span class="code-number">50</span>) -> List[str]:
+    chunks = []
+    start = <span class="code-number">0</span>
+    
+    <span class="code-keyword">while</span> start < len(text):
+        end = start + chunk_size
+        chunk = text[start:end]
+        
+        <span class="code-keyword">if</span> chunk.strip():
+            chunks.append(chunk)
+        
+        start += (chunk_size - overlap)
+    
+    <span class="code-keyword">return</span> chunks
+
+<span class="code-comment"># Example output:</span>
+<span class="code-comment"># ["Our vacation policy allows...", "...allows 15 days per year...", ...]</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="flow-step">
+                <div style="position: relative;">
+                    <div class="step-number">5</div>
+                    <div class="step-connector"></div>
+                </div>
+                <div class="step-content">
+                    <div class="step-title">
+                        <div class="step-icon icon-embed"></div>
+                        Generate Embeddings
+                    </div>
+                    <div class="step-description">
+                        Convert each text chunk into a 384-dimensional vector using sentence-transformers model.
+                    </div>
+                    <div class="code-block">
+<span class="code-keyword">from</span> sentence_transformers <span class="code-keyword">import</span> SentenceTransformer
+
+model = SentenceTransformer(<span class="code-string">"all-MiniLM-L6-v2"</span>)  <span class="code-comment"># 384 dimensions</span>
+
+<span class="code-keyword">def</span> generate_embeddings(chunks: List[str]) -> List[List[float]]:
+    embeddings = model.encode(chunks)
+    <span class="code-keyword">return</span> embeddings.tolist()
+
+<span class="code-comment"># Example output:</span>
+<span class="code-comment"># [[0.123, -0.456, 0.789, ...], [0.234, -0.567, 0.890, ...], ...]</span>
+<span class="code-comment"># Each vector has 384 dimensions</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6 -->
+            <div class="flow-step">
+                <div style="position: relative;">
+                    <div class="step-number">6</div>
+                    <div class="step-connector"></div>
+                </div>
+                <div class="step-content">
+                    <div class="step-title">
+                        <div class="step-icon icon-store"></div>
+                        Store Vectors (pgvector / Pinecone)
+                    </div>
+                    <div class="step-description">
+                        Store embeddings in vector database with metadata for fast similarity search.
+                    </div>
+                    <div class="code-block">
+<span class="code-comment"># PostgreSQL + pgvector</span>
+<span class="code-keyword">INSERT INTO</span> embeddings (
+    id, document_id, chunk_index, chunk_text, embedding, metadata
+) <span class="code-keyword">VALUES</span> (
+    <span class="code-string">'emb_001'</span>,
+    <span class="code-string">'doc_123'</span>,
+    <span class="code-number">0</span>,
+    <span class="code-string">'Our vacation policy allows...'</span>,
+    <span class="code-string">'[0.123, -0.456, ...]'</span>::vector(<span class="code-number">384</span>),
+    <span class="code-string">'{"company_id": "demo-company", "department": "hr"}'</span>::jsonb
+);
+
+<span class="code-comment"># Create index for fast vector search</span>
+<span class="code-keyword">CREATE INDEX ON</span> embeddings <span class="code-keyword">USING</span> ivfflat (embedding vector_cosine_ops);
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 7 -->
+            <div class="flow-step">
+                <div style="position: relative;">
+                    <div class="step-number">7</div>
+                    <div class="step-connector"></div>
+                </div>
+                <div class="step-content">
+                    <div class="step-title">
+                        <div class="step-icon icon-s3"></div>
+                        Upload to S3
+                    </div>
+                    <div class="step-description">
+                        Store original document in S3 with versioning and encryption enabled.
+                    </div>
+                    <div class="code-block">
+<span class="code-keyword">import</span> boto3
+
+s3 = boto3.client(<span class="code-string">"s3"</span>)
+
+s3_key = <span class="code-string">f"companies/{company_id}/documents/{doc_id}/{filename}"</span>
+
+s3.put_object(
+    Bucket=<span class="code-string">"your-company-documents"</span>,
+    Key=s3_key,
+    Body=file_bytes,
+    Metadata={
+        <span class="code-string">"company_id"</span>: company_id,
+        <span class="code-string">"uploaded_by"</span>: user_id,
+        <span class="code-string">"department"</span>: department
+    },
+    ServerSideEncryption=<span class="code-string">"AES256"</span>
+)
+
+<span class="code-comment"># S3 path: s3://your-company-documents/companies/demo-company/documents/doc_123/policy.pdf</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 8 -->
+            <div class="flow-step">
+                <div style="position: relative;">
+                    <div class="step-number">8</div>
+                    <div class="step-connector"></div>
+                </div>
+                <div class="step-content">
+                    <div class="step-title">
+                        <div class="step-icon icon-db"></div>
+                        Save Metadata to PostgreSQL
+                    </div>
+                    <div class="step-description">
+                        Store document metadata in relational database for querying and management.
+                    </div>
+                    <div class="code-block">
+<span class="code-keyword">INSERT INTO</span> documents (
+    id, company_id, uploaded_by, filename, department,
+    s3_key, file_size, chunk_count, status, created_at
+) <span class="code-keyword">VALUES</span> (
+    <span class="code-string">'doc_123'</span>,
+    <span class="code-string">'demo-company'</span>,
+    <span class="code-string">'user_456'</span>,
+    <span class="code-string">'vacation_policy.pdf'</span>,
+    <span class="code-string">'hr'</span>,
+    <span class="code-string">'companies/demo-company/documents/doc_123/vacation_policy.pdf'</span>,
+    <span class="code-number">245678</span>,
+    <span class="code-number">42</span>,
+    <span class="code-string">'active'</span>,
+    NOW()
+);
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 9 -->
+            <div class="flow-step">
+                <div style="position: relative;">
+                    <div class="step-number">9</div>
+                </div>
+                <div class="step-content">
+                    <div class="step-title">
+                        <div class="step-icon icon-success"></div>
+                        Return Success Response
+                    </div>
+                    <div class="step-description">
+                        Send success response to frontend with document ID and metadata.
+                    </div>
+                    <div class="code-block">
+<span class="code-keyword">return</span> {
+    <span class="code-string">"status"</span>: <span class="code-string">"success"</span>,
+    <span class="code-string">"document_id"</span>: <span class="code-string">"doc_123"</span>,
+    <span class="code-string">"filename"</span>: <span class="code-string">"vacation_policy.pdf"</span>,
+    <span class="code-string">"department"</span>: <span class="code-string">"hr"</span>,
+    <span class="code-string">"chunk_count"</span>: <span class="code-number">42</span>,
+    <span class="code-string">"file_size"</span>: <span class="code-number">245678</span>,
+    <span class="code-string">"s3_url"</span>: <span class="code-string">"s3://your-company-documents/companies/..."</span>,
+    <span class="code-string">"processing_time"</span>: <span class="code-string">"7.2s"</span>,
+    <span class="code-string">"message"</span>: <span class="code-string">"Document uploaded and indexed successfully"</span>
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="summary-box">
+            <h3>📊 Upload Pipeline Summary</h3>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <h4>Security Validations</h4>
+                    <ul>
+                        <li>File type whitelist (.pdf, .docx, .txt only)</li>
+                        <li>File size limit (10MB max)</li>
+                        <li>User role check (admin/uploader only)</li>
+                        <li>JWT token validation</li>
+                        <li>Multi-tenant isolation (company_id)</li>
+                        <li>Department-level access control</li>
+                    </ul>
+                </div>
+                <div class="summary-item">
+                    <h4>Error Handling</h4>
+                    <ul>
+                        <li>HTTP 415: Unsupported file type</li>
+                        <li>HTTP 413: File too large</li>
+                        <li>HTTP 422: Text extraction failed</li>
+                        <li>HTTP 403: Insufficient permissions</li>
+                        <li>HTTP 401: Invalid/expired token</li>
+                        <li>HTTP 503: Bedrock/S3 unavailable</li>
+                    </ul>
+                </div>
+                <div class="summary-item">
+                    <h4>Performance Metrics</h4>
+                    <ul>
+                        <li>Processing time: 5-10 seconds</li>
+                        <li>Chunk generation: ~40 chunks per 10-page PDF</li>
+                        <li>Embedding dimensions: 384</li>
+                        <li>Vector search latency: 50-100ms</li>
+                        <li>S3 upload: 1-2 seconds</li>
+                        <li>Database writes: <100ms</li>
+                    </ul>
+                </div>
+                <div class="summary-item">
+                    <h4>Storage Details</h4>
+                    <ul>
+                        <li>Original file: S3 (versioned, encrypted)</li>
+                        <li>Vectors: pgvector (PostgreSQL)</li>
+                        <li>Metadata: PostgreSQL (documents table)</li>
+                        <li>Audit logs: CloudWatch + local file</li>
+                        <li>S3 lifecycle: 30 days → Intelligent-Tiering</li>
+                        <li>Database backups: Automated daily</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

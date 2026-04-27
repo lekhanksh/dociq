@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocIQ - AWS Architecture Diagram</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Amazon Ember', 'Helvetica Neue', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #232F3E 0%, #1a252f 100%);
+            padding: 40px 20px;
+            color: #232f3e;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            font-size: 42px;
+            color: #232f3e;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 18px;
+            color: #545b64;
+        }
+
+        .badges {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .badge {
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .badge-demo {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            color: #000;
+        }
+
+        .badge-prod {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        /* Main Architecture Diagram */
+        .architecture-container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        .arch-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #232f3e;
+            margin-bottom: 30px;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #FF9900;
+        }
+
+        .architecture-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 40px;
+            align-items: start;
+            position: relative;
+        }
+
+        /* AWS Service Cards */
+        .service-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 2px solid #e1e4e8;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .service-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(255,153,0,0.3);
+            border-color: #FF9900;
+        }
+
+        .service-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            background: linear-gradient(135deg, #FF9900 0%, #ec7211 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            box-shadow: 0 4px 12px rgba(255,153,0,0.3);
+        }
+
+        .service-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #232f3e;
+            margin-bottom: 10px;
+        }
+
+        .service-desc {
+            font-size: 13px;
+            color: #545b64;
+            line-height: 1.6;
+        }
+
+        .service-badge {
+            display: inline-block;
+            background: #FF9900;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        /* VPC Container */
+        .vpc-container {
+            border: 4px solid #147eba;
+            border-radius: 16px;
+            padding: 30px;
+            background: linear-gradient(135deg, #e6f3ff 0%, #f0f8ff 100%);
+            position: relative;
+            box-shadow: inset 0 2px 8px rgba(20,126,186,0.1);
+        }
+
+        .vpc-label {
+            position: absolute;
+            top: -18px;
+            left: 30px;
+            background: linear-gradient(135deg, #147eba 0%, #0d5a8f 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(20,126,186,0.4);
+        }
+
+        .vpc-services {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .mini-service {
+            background: white;
+            border: 2px solid #e1e4e8;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .mini-service:hover {
+            border-color: #FF9900;
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(255,153,0,0.2);
+        }
+
+        .mini-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .mini-info {
+            flex: 1;
+        }
+
+        .mini-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #232f3e;
+            margin-bottom: 3px;
+        }
+
+        .mini-desc {
+            font-size: 11px;
+            color: #545b64;
+        }
+
+        /* Arrows */
+        .arrow-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .arrow {
+            position: absolute;
+            height: 4px;
+            background: linear-gradient(90deg, #FF9900 0%, #ec7211 100%);
+            box-shadow: 0 2px 8px rgba(255,153,0,0.3);
+        }
+
+        .arrow::after {
+            content: '';
+            position: absolute;
+            right: -12px;
+            top: -8px;
+            width: 0;
+            height: 0;
+            border-left: 16px solid #ec7211;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+        }
+
+        .arrow-label {
+            position: absolute;
+            background: #FF9900;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(255,153,0,0.3);
+        }
+
+        /* Cost Breakdown */
+        .cost-container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            margin-top: 30px;
+        }
+
+        .cost-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #232f3e;
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #FF9900;
+        }
+
+        .cost-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .cost-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            border: 3px solid #e1e4e8;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cost-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #FF9900 0%, #ec7211 100%);
+        }
+
+        .cost-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+            border-color: #FF9900;
+        }
+
+        .cost-card.demo::before { background: linear-gradient(90deg, #ffc107 0%, #ff9800 100%); }
+        .cost-card.small::before { background: linear-gradient(90deg, #28a745 0%, #20c997 100%); }
+        .cost-card.medium::before { background: linear-gradient(90deg, #007bff 0%, #0056b3 100%); }
+        .cost-card.enterprise::before { background: linear-gradient(90deg, #dc3545 0%, #c82333 100%); }
+
+        .cost-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .cost-tier {
+            font-size: 20px;
+            font-weight: 700;
+            color: #232f3e;
+            margin-bottom: 8px;
+        }
+
+        .cost-users {
+            font-size: 13px;
+            color: #545b64;
+            margin-bottom: 15px;
+        }
+
+        .cost-amount {
+            font-size: 36px;
+            font-weight: 700;
+            color: #FF9900;
+            margin-bottom: 15px;
+        }
+
+        .cost-details {
+            font-size: 12px;
+            color: #545b64;
+            line-height: 1.8;
+            text-align: left;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .cost-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #232f3e 0%, #3f4e5f 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 6px solid #FF9900;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .stat-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #FF9900;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #AAB7B8;
+        }
+
+        @media (max-width: 1400px) {
+            .architecture-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            .cost-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .cost-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🏗️ DocIQ - AWS Architecture</h1>
+            <p>Secure Multi-Tenant RAG Chatbot with Enterprise-Grade Security</p>
+            <div class="badges">
+                <div class="badge badge-demo">🧪 DEMO: Public ALB, SQLite, 1 Task</div>
+                <div class="badge badge-prod">🚀 PRODUCTION: Internal ALB, RDS Aurora, 2-10 Tasks</div>
+            </div>
+        </div>
+
+        <!-- Architecture Diagram -->
+        <div class="architecture-container">
+            <div class="arch-title">System Architecture</div>
+            
+            <div class="architecture-grid">
+                <!-- Frontend -->
+                <div>
+                    <div class="service-card" style="margin-bottom: 20px;">
+                        <div class="service-icon" style="background: linear-gradient(135deg, #8C4FFF 0%, #6D28D9 100%);">☁️</div>
+                        <div class="service-name">CloudFront CDN</div>
+                        <div class="service-desc">
+                            <strong>Global Content Delivery</strong><br>
+                            Edge locations worldwide<br>
+                            HTTPS + caching<br><br>
+                            <strong>Prod only:</strong> Serves React app
+                        </div>
+                        <div class="service-badge">AWS CloudFront</div>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">🌐</div>
+                        <div class="service-name">Frontend</div>
+                        <div class="service-desc">
+                            <strong>React 18 + TypeScript</strong><br>
+                            Vite + shadcn/ui<br><br>
+                            <strong>Demo:</strong> localhost:8080<br>
+                            <strong>Prod:</strong> S3 + CloudFront
+                        </div>
+                        <div class="service-badge">Client Layer</div>
+                    </div>
+                </div>
+
+                <!-- VPC Container -->
+                <div class="vpc-container">
+                    <div class="vpc-label">🔒 VPC: 10.0.0.0/16 (us-east-1)</div>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <div class="service-card" style="margin-bottom: 20px;">
+                            <div class="service-icon">⚖️</div>
+                            <div class="service-name">Application Load Balancer</div>
+                            <div class="service-desc">
+                                <strong>Demo:</strong> internet-facing (public)<br>
+                                <strong>Prod:</strong> internal (VPC only)<br>
+                                HTTPS:443 → ECS:8000
+                            </div>
+                            <div class="service-badge">AWS ALB</div>
+                        </div>
+
+                        <div class="service-card">
+                            <div class="service-icon">🐳</div>
+                            <div class="service-name">ECS Fargate</div>
+                            <div class="service-desc">
+                                <strong>FastAPI Backend</strong><br>
+                                1 vCPU, 2GB RAM<br><br>
+                                <strong>Demo:</strong> 1 task (on-demand)<br>
+                                <strong>Prod:</strong> 2-10 tasks (Spot, 70% off)
+                            </div>
+                            <div class="service-badge">Serverless Containers</div>
+                        </div>
+                    </div>
+
+                    <div class="vpc-services">
+                        <div class="mini-service">
+                            <div class="mini-icon" style="background: linear-gradient(135deg, #527FFF 0%, #3d5fcc 100%);">💾</div>
+                            <div class="mini-info">
+                                <div class="mini-name">RDS Aurora</div>
+                                <div class="mini-desc">PostgreSQL + pgvector<br>(Demo: SQLite)</div>
+                            </div>
+                        </div>
+
+                        <div class="mini-service">
+                            <div class="mini-icon" style="background: linear-gradient(135deg, #569A31 0%, #3d7021 100%);">📦</div>
+                            <div class="mini-info">
+                                <div class="mini-name">S3 (Documents)</div>
+                                <div class="mini-desc">User uploads<br>Versioned + encrypted</div>
+                            </div>
+                        </div>
+
+                        <div class="mini-service">
+                            <div class="mini-icon" style="background: linear-gradient(135deg, #569A31 0%, #3d7021 100%);">📦</div>
+                            <div class="mini-info">
+                                <div class="mini-name">S3 (Frontend)</div>
+                                <div class="mini-desc">React build<br>Prod: CloudFront origin</div>
+                            </div>
+                        </div>
+
+                        <div class="mini-service">
+                            <div class="mini-icon" style="background: linear-gradient(135deg, #01A88D 0%, #017a68 100%);">🤖</div>
+                            <div class="mini-info">
+                                <div class="mini-name">AWS Bedrock</div>
+                                <div class="mini-desc">Amazon Nova Pro<br>RAG inference</div>
+                            </div>
+                        </div>
+
+                        <div class="mini-service">
+                            <div class="mini-icon" style="background: linear-gradient(135deg, #DD344C 0%, #b02a3d 100%);">🔐</div>
+                            <div class="mini-info">
+                                <div class="mini-name">Secrets Manager</div>
+                                <div class="mini-desc">JWT secrets<br>Encrypted storage</div>
+                            </div>
+                        </div>
+
+                        <div class="mini-service">
+                            <div class="mini-icon" style="background: linear-gradient(135deg, #FF9900 0%, #ec7211 100%);">📦</div>
+                            <div class="mini-info">
+                                <div class="mini-name">Amazon ECR</div>
+                                <div class="mini-desc">Docker registry<br>linux/amd64</div>
+                            </div>
+                        </div>
+
+                        <div class="mini-service">
+                            <div class="mini-icon" style="background: linear-gradient(135deg, #FF4F8B 0%, #d93f73 100%);">📊</div>
+                            <div class="mini-info">
+                                <div class="mini-name">CloudWatch</div>
+                                <div class="mini-desc">Logs + Metrics<br>Monitoring</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Layer -->
+                <div class="service-card">
+                    <div class="service-icon">🗄️</div>
+                    <div class="service-name">Data Layer</div>
+                    <div class="service-desc">
+                        <strong>Metadata:</strong> PostgreSQL<br>
+                        <strong>Vectors:</strong> pgvector (384d)<br>
+                        <strong>Files:</strong> S3 (versioned)<br>
+                        <strong>Secrets:</strong> Secrets Manager<br><br>
+                        Multi-tenant isolation<br>
+                        Department-level RBAC
+                    </div>
+                    <div class="service-badge">Storage Layer</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cost Breakdown -->
+        <div class="cost-container">
+            <div class="cost-title">💰 Cost Breakdown by Scale</div>
+            
+            <div class="cost-grid">
+                <!-- Demo -->
+                <div class="cost-card demo">
+                    <div class="cost-icon">🧪</div>
+                    <div class="cost-tier">Demo/Test</div>
+                    <div class="cost-users">Testing only<br>~10 queries/day</div>
+                    <div class="cost-amount">$35</div>
+                    <div style="font-size: 12px; color: #856404; font-weight: 600;">per month</div>
+                    <div class="cost-details">
+                        <div class="cost-item">
+                            <span>ECS Fargate Spot</span>
+                            <span>$9</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>ALB (public)</span>
+                            <span>$16</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>VPC Endpoints (2)</span>
+                            <span>$7</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>S3 + Bedrock</span>
+                            <span>$2</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>CloudWatch</span>
+                            <span>$1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Small Team -->
+                <div class="cost-card small">
+                    <div class="cost-icon">👥</div>
+                    <div class="cost-tier">Small Team</div>
+                    <div class="cost-users">1-50 users<br>~500 queries/day</div>
+                    <div class="cost-amount">$71</div>
+                    <div style="font-size: 12px; color: #155724; font-weight: 600;">per month</div>
+                    <div class="cost-details">
+                        <div class="cost-item">
+                            <span>ECS Fargate Spot (2)</span>
+                            <span>$18</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>ALB (internal)</span>
+                            <span>$16</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>RDS t4g.micro</span>
+                            <span>$12</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>Bedrock</span>
+                            <span>$10</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>VPC + S3 + Other</span>
+                            <span>$15</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medium Company -->
+                <div class="cost-card medium">
+                    <div class="cost-icon">🏢</div>
+                    <div class="cost-tier">Medium</div>
+                    <div class="cost-users">50-500 users<br>~5K queries/day</div>
+                    <div class="cost-amount">$235</div>
+                    <div style="font-size: 12px; color: #004085; font-weight: 600;">per month</div>
+                    <div class="cost-details">
+                        <div class="cost-item">
+                            <span>ECS Fargate Spot (4)</span>
+                            <span>$36</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>RDS t4g.small (Multi-AZ)</span>
+                            <span>$50</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>Bedrock</span>
+                            <span>$100</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>ALB + CloudFront</span>
+                            <span>$30</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>VPC + S3 + WAF</span>
+                            <span>$19</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enterprise -->
+                <div class="cost-card enterprise">
+                    <div class="cost-icon">🏭</div>
+                    <div class="cost-tier">Enterprise</div>
+                    <div class="cost-users">500-5000 users<br>~50K queries/day</div>
+                    <div class="cost-amount">$1,547</div>
+                    <div style="font-size: 12px; color: #721c24; font-weight: 600;">per month</div>
+                    <div class="cost-details">
+                        <div class="cost-item">
+                            <span>Bedrock (50K/day)</span>
+                            <span>$1,000</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>RDS Aurora r6g.large</span>
+                            <span>$280</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>ECS Fargate Spot (10)</span>
+                            <span>$90</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>Redis + ALB + S3</span>
+                            <span>$120</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>Monitoring + Security</span>
+                            <span>$57</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stat-box">
+                    <div class="stat-value">2-3s</div>
+                    <div class="stat-label">Query Response Time</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">99.9%</div>
+                    <div class="stat-label">Uptime SLA (Production)</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">10MB</div>
+                    <div class="stat-label">Max File Size</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">$0.02</div>
+                    <div class="stat-label">Cost Per Query</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

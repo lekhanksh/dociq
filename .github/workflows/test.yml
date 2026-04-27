@@ -1,0 +1,55 @@
+name: Tests
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: dociq
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: dociq_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install -r backend/requirements.txt pytest httpx pytest-asyncio
+
+      - name: Run migrations on test DB
+        run: |
+          cd backend
+          alembic upgrade head
+        env:
+          DATABASE_URL: postgresql://dociq:testpassword@localhost:5432/dociq_test
+          ENV: test
+
+      - name: Run tests
+        run: pytest backend/tests/ -v --tb=short
+        env:
+          ENV: test
+          DATABASE_URL: postgresql://dociq:testpassword@localhost:5432/dociq_test
+          JWT_SECRET: test-secret-minimum-32-characters-long
+
+      - name: Lint
+        run: |
+          pip install flake8
+          flake8 backend/ --max-line-length=100 --exclude=venv,migrations

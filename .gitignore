@@ -1,0 +1,81 @@
+# Environment variables (SECRETS!)
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+*.env
+backend/.env
+frontend/.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+backend/venv/
+backend/env/
+
+# Databases (contains sensitive data)
+*.db
+*.sqlite
+*.sqlite3
+dociq.db
+dociq_vectors.db
+backend/dociq.db
+backend/dociq_vectors.db
+backend/test.db
+
+# Logs (may contain sensitive info)
+*.log
+logs/
+backend/logs/
+*.audit.log
+
+# Node
+node_modules/
+frontend/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+frontend/dist/
+frontend/build/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Terraform (may contain state with secrets)
+infra/terraform/.terraform/
+infra/terraform/*.tfstate
+infra/terraform/*.tfstate.*
+infra/terraform/.terraform.lock.hcl
+infra/terraform/terraform.tfvars
+
+# AWS credentials
+.aws/
+credentials
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Misc
+*.bak
+*.tmp
+.cache/

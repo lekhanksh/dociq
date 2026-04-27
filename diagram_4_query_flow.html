@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocIQ - RAG Query Flow</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Amazon Ember', 'Helvetica Neue', Roboto, Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 30px;
+            color: #232f3e;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 40px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #8C4FFF;
+            padding-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 36px;
+            color: #232f3e;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .time-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #8C4FFF 0%, #6D28D9 100%);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 RAG Query Flow - Complete Pipeline</h1>
+            <p>From Question to Answer: 11-Step Retrieval-Augmented Generation</p>
+        </div>
+        <div style="text-align: center;">
+            <div class="time-badge">⏱️ Total Time: 2-3 seconds per query</div>
+        </div>
+        <div style="padding: 30px; background: #f8f9fa; border-radius: 8px; margin-top: 30px;">
+            <h2 style="font-size: 24px; margin-bottom: 20px;">Query Flow Steps:</h2>
+            <ol style="font-size: 16px; line-height: 2.5; margin-left: 30px;">
+                <li><strong>User asks question</strong> - Natural language query submitted</li>
+                <li><strong>Detect complexity</strong> - Check for keywords: total, calculate, sum, all, across</li>
+                <li><strong>Generate embedding</strong> - Convert question to 384d vector</li>
+                <li><strong>Vector search</strong> - Find top 5-15 similar chunks (pgvector)</li>
+                <li><strong>Filter by department</strong> - Apply RBAC and multi-tenant isolation</li>
+                <li><strong>Group by document</strong> - Organize chunks by source file</li>
+                <li><strong>Build context</strong> - Format for AI with document boundaries</li>
+                <li><strong>Call Bedrock</strong> - Send to Amazon Nova Pro with system prompt</li>
+                <li><strong>Parse response</strong> - Extract answer with citations</li>
+                <li><strong>Audit log</strong> - Record query, user, IP, timestamp</li>
+                <li><strong>Return to user</strong> - Display answer with expandable sources</li>
+            </ol>
+        </div>
+        <div style="margin-top: 40px; padding: 30px; background: linear-gradient(135deg, #232f3e 0%, #3f4e5f 100%); color: white; border-radius: 8px;">
+            <h3 style="font-size: 22px; margin-bottom: 20px; color: #8C4FFF;">Key Features:</h3>
+            <ul style="font-size: 14px; line-height: 2; list-style: none;">
+                <li>✓ Multi-document reasoning (calculate across files)</li>
+                <li>✓ Department-level isolation (HR can't see Finance)</li>
+                <li>✓ Vector similarity search (50-100ms latency)</li>
+                <li>✓ Source citations (every answer traceable)</li>
+                <li>✓ Audit logging (compliance-ready)</li>
+                <li>✓ Rate limiting (100 requests/min per user)</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

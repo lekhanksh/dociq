@@ -1,0 +1,25 @@
+Q1 2024 Financial Report - Revenue Summary
+
+Company: DocIQ Inc.
+Period: January 1, 2024 - March 31, 2024
+Department: Finance
+
+Revenue Breakdown:
+
+Product Sales: $450,000
+- Software Licenses: $280,000
+- Professional Services: $170,000
+
+Subscription Revenue: $320,000
+- Monthly Subscriptions: $180,000
+- Annual Subscriptions: $140,000
+
+Total Q1 2024 Revenue: $770,000
+
+Growth: 15% compared to Q4 2023
+Gross Margin: 68%
+
+Key Highlights:
+- Strong growth in subscription revenue
+- New enterprise clients added: 12
+- Customer retention rate: 94%

@@ -1,0 +1,16 @@
+DocIQ Sample Company Policy Document
+
+Annual Leave Policy:
+- Full-time employees receive 20 days of annual leave per calendar year.
+- Carry forward is capped at 5 days.
+
+Sick Leave Policy:
+- Employees receive 10 days of paid sick leave per year.
+- Medical certificate is required for absences longer than 2 consecutive days.
+
+Work From Home Policy:
+- Employees may work from home up to 2 days per week with manager approval.
+
+Travel Reimbursement Policy:
+- Flight reimbursement cap for domestic travel is 12000 INR.
+- Hotel reimbursement cap is 6000 INR per night.

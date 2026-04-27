@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  backend:
+    image: your-ecr-repo/dociq-backend:latest
+    env_file:
+      - ./backend/.env.production.example
+    environment:
+      VECTOR_BACKEND: pgvector
+    ports:
+      - "8000:8000"
+    restart: always
+    read_only: true
+    tmpfs:
+      - /tmp
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
