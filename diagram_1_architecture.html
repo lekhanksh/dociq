@@ -428,11 +428,11 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>🏗️ DocIQ - AWS Architecture</h1>
-            <p>Secure Multi-Tenant RAG Chatbot with Enterprise-Grade Security</p>
+            <h1>🏗️ DocIQ - Production Architecture</h1>
+            <p>Secure Multi-Tenant RAG Chatbot - Enterprise-Grade Security</p>
             <div class="badges">
-                <div class="badge badge-demo">🧪 DEMO: Public ALB, SQLite, 1 Task</div>
-                <div class="badge badge-prod">🚀 PRODUCTION: Internal ALB, RDS Aurora, 2-10 Tasks</div>
+                <div class="badge badge-prod">🚀 PRODUCTION ARCHITECTURE</div>
+                <div class="badge badge-demo">🧪 Demo used: Public ALB, SQLite, localhost frontend</div>
             </div>
         </div>
 
@@ -449,22 +449,22 @@
                         <div class="service-desc">
                             <strong>Global Content Delivery</strong><br>
                             Edge locations worldwide<br>
-                            HTTPS + caching<br><br>
-                            <strong>Prod only:</strong> Serves React app
+                            HTTPS + WAF protection<br><br>
+                            <span style="color: #856404; font-size: 12px;">⚠️ Demo: localhost:8080</span>
                         </div>
                         <div class="service-badge">AWS CloudFront</div>
                     </div>
 
                     <div class="service-card">
-                        <div class="service-icon">🌐</div>
-                        <div class="service-name">Frontend</div>
+                        <div class="service-icon" style="background: linear-gradient(135deg, #569A31 0%, #3d7021 100%);">📦</div>
+                        <div class="service-name">S3 (Frontend)</div>
                         <div class="service-desc">
-                            <strong>React 18 + TypeScript</strong><br>
-                            Vite + shadcn/ui<br><br>
-                            <strong>Demo:</strong> localhost:8080<br>
-                            <strong>Prod:</strong> S3 + CloudFront
+                            <strong>Static Website Hosting</strong><br>
+                            React build artifacts<br>
+                            CloudFront origin<br><br>
+                            <span style="color: #856404; font-size: 12px;">⚠️ Demo: Local dev server</span>
                         </div>
-                        <div class="service-badge">Client Layer</div>
+                        <div class="service-badge">Origin Storage</div>
                     </div>
                 </div>
 
@@ -474,14 +474,15 @@
                     
                     <div style="margin-bottom: 25px;">
                         <div class="service-card" style="margin-bottom: 20px;">
-                            <div class="service-icon">⚖️</div>
-                            <div class="service-name">Application Load Balancer</div>
+                            <div class="service-icon">🔒</div>
+                            <div class="service-name">Internal ALB</div>
                             <div class="service-desc">
-                                <strong>Demo:</strong> internet-facing (public)<br>
-                                <strong>Prod:</strong> internal (VPC only)<br>
-                                HTTPS:443 → ECS:8000
+                                <strong>Private Load Balancer</strong><br>
+                                VPC-only access (no internet)<br>
+                                HTTPS:443 → ECS:8000<br><br>
+                                <span style="color: #856404; font-size: 12px;">⚠️ Demo: Public ALB (internet-facing)</span>
                             </div>
-                            <div class="service-badge">AWS ALB</div>
+                            <div class="service-badge">Internal Only</div>
                         </div>
 
                         <div class="service-card">
@@ -489,9 +490,10 @@
                             <div class="service-name">ECS Fargate</div>
                             <div class="service-desc">
                                 <strong>FastAPI Backend</strong><br>
-                                1 vCPU, 2GB RAM<br><br>
-                                <strong>Demo:</strong> 1 task (on-demand)<br>
-                                <strong>Prod:</strong> 2-10 tasks (Spot, 70% off)
+                                1 vCPU, 2GB RAM<br>
+                                2-10 tasks (auto-scale)<br>
+                                Fargate Spot (70% discount)<br><br>
+                                <span style="color: #856404; font-size: 12px;">⚠️ Demo: 1 task on-demand</span>
                             </div>
                             <div class="service-badge">Serverless Containers</div>
                         </div>
@@ -501,8 +503,8 @@
                         <div class="mini-service">
                             <div class="mini-icon" style="background: linear-gradient(135deg, #527FFF 0%, #3d5fcc 100%);">💾</div>
                             <div class="mini-info">
-                                <div class="mini-name">RDS Aurora</div>
-                                <div class="mini-desc">PostgreSQL + pgvector<br>(Demo: SQLite)</div>
+                                <div class="mini-name">RDS Aurora PostgreSQL</div>
+                                <div class="mini-desc">Multi-AZ + pgvector<br><span style="color: #856404; font-size: 11px;">Demo: SQLite</span></div>
                             </div>
                         </div>
 
@@ -518,7 +520,7 @@
                             <div class="mini-icon" style="background: linear-gradient(135deg, #569A31 0%, #3d7021 100%);">📦</div>
                             <div class="mini-info">
                                 <div class="mini-name">S3 (Frontend)</div>
-                                <div class="mini-desc">React build<br>Prod: CloudFront origin</div>
+                                <div class="mini-desc">React build<br>CloudFront origin</div>
                             </div>
                         </div>
 
@@ -561,12 +563,13 @@
                     <div class="service-icon">🗄️</div>
                     <div class="service-name">Data Layer</div>
                     <div class="service-desc">
-                        <strong>Metadata:</strong> PostgreSQL<br>
+                        <strong>Metadata:</strong> RDS Aurora PostgreSQL<br>
                         <strong>Vectors:</strong> pgvector (384d)<br>
                         <strong>Files:</strong> S3 (versioned)<br>
                         <strong>Secrets:</strong> Secrets Manager<br><br>
                         Multi-tenant isolation<br>
-                        Department-level RBAC
+                        Department-level RBAC<br><br>
+                        <span style="color: #856404; font-size: 12px;">⚠️ Demo: SQLite (local files)</span>
                     </div>
                     <div class="service-badge">Storage Layer</div>
                 </div>
