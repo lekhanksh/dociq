@@ -109,9 +109,7 @@ terraform apply
 - Uploader: `sarah@dociq.com` / `demo123` / `demo-company`
 - Viewer: `viewer@dociq.com` / `demo123` / `demo-company`
 
-## 📝 License
 
-MIT
 
 ## ⚠️ Important Notes
 
